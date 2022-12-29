@@ -45,14 +45,15 @@ main(){
 _md_init(){
   # after compo add new line, because pandoc
   # not give me all figure code of includegraphics
-  sed -i 's@^--- *compo *= *\([0-9]\)@---compo = \1\n\n@' "$input_file_tmp"
+  sed -i 's@^--- *compo *= *[0-9] *$@&\n\n@' "$input_file_tmp"
+  sed -i 's@^--- *compotext *$@&\n\n@' "$input_file_tmp"
 }
 
 
 _compo(){
   local tmp="$(mktemp)"
   cat "$output_file" | sed ':a;N;$!ba;s#\n#@@@#g' |
-  sed 's/@@@--- *compo *= *\([0-9]\)@@@.\{50\}\([^}]*\).\{13\}\([^}]*\).\{16\}/@@@\\compo\[0.\1]{\ntext\n}{\n\\includegraphics[height=\\textwidth,width=\\textwidth]{\2}\n}{\3}/g' |
+  sed 's/--- *compo *= *\([0-9]\) *@@@\([^\]*\).\{47\}\([^}]*\).\{12\}.\([^}]*\).\{16\}/@@@\\compo\[0.\1]{\n\2\n}{\n\\includegraphics[height=\\textwidth,width=\\textwidth]{\3}\n}{\4}/g'  |
   sed 's#@@@#\n#g' > "$tmp"
   cat "$tmp" > "$output_file"
 }
