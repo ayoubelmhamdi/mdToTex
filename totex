@@ -1,20 +1,25 @@
 #!/bin/bash
+# shellcheck disable=2155,2002
 
 # Set the input and output filenames
 input_file="$1"
 output_file="${input_file%.*}.tex"
 
+# bac md file
+input_file_tmp="$(mktemp)"
+cp -f "$input_file" "$input_file_tmp"
+input_file="$input_file_tmp"
+
 main(){
-  # Check if the input file exists
   if [ -f "$input_file" ]; then
-    # Convert the input file to a LaTeX file
+    _md_init
 
     pandoc "$input_file" -o "$output_file"
     if [ $? -eq 0 ];then
       _delete "hypertarget" "tightlist"
       _change "\\\section@\\\chapter" "\\\subsection@\\\section" "\\\subsubsection@\\\subsection" "\\\subsubsubsection@\\\subsubsection"
-      _change "\\\includegraphics@\\\includegraphics\[height=\\\textwidth,width=\\\textwidth\]"
       _change "\\\label{[^}].*}@"
+      _compo
       _insert_at_top
     fi
   else
@@ -22,6 +27,36 @@ main(){
     echo "Error: Input file not found!"
   fi
 }
+
+# \compo[0.8]{ ce concept }{
+#   \includegraphics[height=\textwidth,width=\textwidth]{pages/photo/ayoubOnMotor.png}
+# }
+#
+#
+# --- comment
+# texting
+# --- comment
+# ![image](photo/ayoub.jpg)
+# --- compo=8
+# ![image](photo/ayoub.jpg)
+# --- compo=8
+# ![image](photo/ayoub.jpg)
+# --- compo8
+_md_init(){
+  # after compo add new line, because pandoc
+  # not give me all figure code of includegraphics
+  sed -i 's@^--- *compo *= *\([0-9]\)@---compo = \1\n\n@' "$input_file_tmp"
+}
+
+
+_compo(){
+  local tmp="$(mktemp)"
+  cat "$output_file" | sed ':a;N;$!ba;s#\n#@@@#g' |
+  sed 's/@@@--- *compo *= *\([0-9]\)@@@.\{50\}\([^}]*\).\{13\}\([^}]*\).\{16\}/@@@\\compo\[0.\1]{\ntext\n}{\n\\includegraphics[height=\\textwidth,width=\\textwidth]{\2}\n}{\3}/g' |
+  sed 's#@@@#\n#g' > "$tmp"
+  cat "$tmp" > "$output_file"
+}
+
 
 _change(){
   args=""
