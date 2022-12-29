@@ -14,6 +14,7 @@ main(){
       _delete "hypertarget" "tightlist"
       _change "\\\section@\\\chapter" "\\\subsection@\\\section" "\\\subsubsection@\\\subsection" "\\\subsubsubsection@\\\subsubsection"
       _change "\\\includegraphics@\\\includegraphics\[height=\\\textwidth,width=\\\textwidth\]"
+      _change "\\\label{[^}].*}@"
       _insert_at_top
     fi
   else
