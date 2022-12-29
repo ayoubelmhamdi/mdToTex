@@ -28,29 +28,16 @@ main(){
   fi
 }
 
-# \compo[0.8]{ ce concept }{
-#   \includegraphics[height=\textwidth,width=\textwidth]{pages/photo/ayoubOnMotor.png}
-# }
-#
-#
-# --- comment
-# texting
-# --- comment
-# ![image](photo/ayoub.jpg)
-# --- compo=8
-# ![image](photo/ayoub.jpg)
-# --- compo=8
-# ![image](photo/ayoub.jpg)
-# --- compo8
 _md_init(){
   # after compo add new line, because pandoc
   # not give me all figure code of includegraphics
   sed -i 's@^--- *compo *= *[0-9] *$@&\n\n@' "$input_file_tmp"
-  sed -i 's@^--- *compotext *$@&\n\n@' "$input_file_tmp"
 }
 
 
 _compo(){
+  # why if compo text after image content \
+  # how i can hadle gredy for only \begin{figure}
   local tmp="$(mktemp)"
   cat "$output_file" | sed ':a;N;$!ba;s#\n#@@@#g' |
   sed 's/--- *compo *= *\([0-9]\) *@@@\([^\]*\).\{47\}\([^}]*\).\{12\}.\([^}]*\).\{16\}/@@@\\compo\[0.\1]{\n\2\n}{\n\\includegraphics[height=\\textwidth,width=\\textwidth]{\3}\n}{\4}/g'  |
@@ -84,12 +71,12 @@ sed -i '1i\
 %% the page should recalculate\
 %% or create an tex scipt to calcle automaitic\
 %% Adjust expace for the section and subsection and chapter\
-\\pagestyle{monstyle}\setcounter{page}{1}\
+% \pagestyle{monstyle}setcounter{page}{5}\
 \\chapter{Introduction}\
 \\vspace{2cm}\
 \\section{Historique}\
-\\vspace{-1cm}\
 \\subsection{1950}\
-\\vspace{-1cm}' "$output_file"
+' "$output_file"
 }
+
 main
